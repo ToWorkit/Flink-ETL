@@ -148,25 +148,42 @@ object HBaseUtil {
    * @param tableNameStr
    * @param rowkey
    * @param columnFamilyName
-   * @param ColumnNameList 多个列名
+   * @param columnNameList 多个列名
    * @return 多个列名和多个列值的Map集合
    */
-  def getMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, ColumnNameList: List[String]):Map[String, String] = {
+  def getMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnNameList: List[String]):Map[String, String] = {
     // 1、获取table
     val table = getTable(tableNameStr, columnFamilyName)
     try {
       // 2、构建Get对象
+      val getRK = new Get(rowkey.getBytes)
 
       // 3、执行查询
+      val result = table.get(getRK)
 
       // 4、遍历列名集合，取出列值，构建成Map返回
-    } catch {
+      columnNameList.map{
+        col =>
+          val bytes: Array[Byte] = result.getValue(columnFamilyName.getBytes(), col.getBytes)
 
+          // 返回Map对象
+          if (bytes != null && bytes.size > 0) {
+            col -> Bytes.toString(bytes)
+          } else {
+            "" -> ""
+          }
+      }.filter(_._1 != "").toMap // 过滤掉空值
+    } catch {
       case e: Exception => e.printStackTrace()
       Map[String, String]()
     } finally {
+      // 5、关闭table
       table.close()
     }
+  }
+
+  def deleteData(tableNameStr: String, rowkey: String, columnFamilyName: String) = {
+    
   }
 
   def main(args: Array[String]): Unit = {
@@ -182,5 +199,8 @@ object HBaseUtil {
       "t3" -> "b",
       "t4" -> "c"
     )
+
+    // putMapData("test", "1", "info", map)
+    // println(getMapData("test", "1", "info", List("t1", "t2")))
   }
 }
