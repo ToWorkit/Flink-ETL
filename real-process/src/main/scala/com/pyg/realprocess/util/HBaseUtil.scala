@@ -2,7 +2,8 @@ package com.pyg.realprocess.util
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Admin, ColumnFamilyDescriptor, ColumnFamilyDescriptorBuilder, Connection, ConnectionFactory, Put, Table, TableDescriptor, TableDescriptorBuilder}
+import org.apache.hadoop.hbase.client.{Admin, ColumnFamilyDescriptor, ColumnFamilyDescriptorBuilder, Connection, ConnectionFactory, Get, Put, Result, Table, TableDescriptor, TableDescriptorBuilder}
+import org.apache.hadoop.hbase.util.Bytes
 
 /**
  * HBase的工具类
@@ -76,10 +77,110 @@ object HBaseUtil {
     }
   }
 
+  /**
+   * 通过单列名获取列值
+   * @param tableNameStr
+   * @param rowkey
+   * @param columnFamilyName
+   * @param columnName
+   */
+  def getData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnName: String) = {
+    // 1、获取table对象
+    val table = getTable(tableNameStr, columnFamilyName)
+
+    try {
+      // 2、构建Get对象
+      val get = new Get(rowkey.getBytes)
+      // 3、进行查询
+      val result: Result = table.get(get)
+      // 4、判断查询结果是否为空，并且包含我们要查询的列
+      if (result!=null && result.containsColumn(columnFamilyName.getBytes, columnName.getBytes)) {
+        val bytes: Array[Byte] = result.getValue(columnFamilyName.getBytes, columnName.getBytes)
+
+        Bytes.toString(bytes)
+      }
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+        ""
+      }
+    } finally {
+      // 5、关闭表
+      table.close()
+    }
+
+
+  }
+
+
+  /**
+   * 存储多列数据
+   * @param tableNameStr
+   * @param rowkey
+   * @param columnFamilyName
+   * @param map 多个列名和列值集合
+   */
+  def putMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, map: Map[String, Any]) = {
+    // 1、获取Table
+    val table = getTable(tableNameStr, columnFamilyName)
+    try {
+      // 2、创建Put
+      val put = new Put(rowkey.getBytes)
+      // 3、在Put中添加多个列名和列值
+      for ((colName, colValue) <- map) {
+        put.addColumn(columnFamilyName.getBytes, colName.getBytes, colValue.toString.getBytes)
+      }
+      // 4、保存Put
+      table.put(put)
+    } catch {
+      case e: Exception => {
+        e.printStackTrace()
+        ""
+      }
+    } finally {
+      // 5、关闭表
+      table.close()
+    }
+  }
+
+  /**
+   * 获取多列数据的值
+   * @param tableNameStr
+   * @param rowkey
+   * @param columnFamilyName
+   * @param ColumnNameList 多个列名
+   * @return 多个列名和多个列值的Map集合
+   */
+  def getMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, ColumnNameList: List[String]):Map[String, String] = {
+    // 1、获取table
+    val table = getTable(tableNameStr, columnFamilyName)
+    try {
+      // 2、构建Get对象
+
+      // 3、执行查询
+
+      // 4、遍历列名集合，取出列值，构建成Map返回
+    } catch {
+
+      case e: Exception => e.printStackTrace()
+      Map[String, String]()
+    } finally {
+      table.close()
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     // println(getTable("test", "info"))
 
     // 保存数据
-    putData("test", "1", "info", "t1", "Hello World")
+    // putData("test", "1", "info", "t1", "Hello World")
+
+    // println(getData("test", "1", "info", "t1"))
+
+    val map = Map(
+      "t2" -> "a",
+      "t3" -> "b",
+      "t4" -> "c"
+    )
   }
 }
