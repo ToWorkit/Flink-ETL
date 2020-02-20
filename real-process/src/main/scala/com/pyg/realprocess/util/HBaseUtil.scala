@@ -2,7 +2,7 @@ package com.pyg.realprocess.util
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Admin, ColumnFamilyDescriptor, ColumnFamilyDescriptorBuilder, Connection, ConnectionFactory, Get, Put, Result, Table, TableDescriptor, TableDescriptorBuilder}
+import org.apache.hadoop.hbase.client.{Admin, ColumnFamilyDescriptor, ColumnFamilyDescriptorBuilder, Connection, ConnectionFactory, Delete, Get, Put, Result, Table, TableDescriptor, TableDescriptorBuilder}
 import org.apache.hadoop.hbase.util.Bytes
 
 /**
@@ -84,7 +84,7 @@ object HBaseUtil {
    * @param columnFamilyName
    * @param columnName
    */
-  def getData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnName: String) = {
+  def getData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnName: String): String = {
     // 1、获取table对象
     val table = getTable(tableNameStr, columnFamilyName)
 
@@ -98,6 +98,8 @@ object HBaseUtil {
         val bytes: Array[Byte] = result.getValue(columnFamilyName.getBytes, columnName.getBytes)
 
         Bytes.toString(bytes)
+      } else {
+        ""
       }
     } catch {
       case e: Exception => {
@@ -108,7 +110,6 @@ object HBaseUtil {
       // 5、关闭表
       table.close()
     }
-
 
   }
 
@@ -182,12 +183,33 @@ object HBaseUtil {
     }
   }
 
+  /**
+   * 删除数据
+   * @param tableNameStr
+   * @param rowkey
+   * @param columnFamilyName
+   */
   def deleteData(tableNameStr: String, rowkey: String, columnFamilyName: String) = {
-    
+    // 1、获取table
+    val table: Table = getTable(tableNameStr, columnFamilyName)
+
+    try {
+      // 2、构建Delete对象
+      val delete: Delete = new Delete(rowkey.getBytes)
+
+      // 3、执行删除
+      table.delete(delete)
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+    } finally {
+      // 4、关闭table
+      table.close()
+    }
   }
 
   def main(args: Array[String]): Unit = {
-    // println(getTable("test", "info"))
+     println(getTable("test", "info"))
 
     // 保存数据
     // putData("test", "1", "info", "t1", "Hello World")
@@ -202,5 +224,8 @@ object HBaseUtil {
 
     // putMapData("test", "1", "info", map)
     // println(getMapData("test", "1", "info", List("t1", "t2")))
+
+//    deleteData("test", "1", "info")
+//    println(getMapData("test", "1", "info", List("t1", "t2")))
   }
 }

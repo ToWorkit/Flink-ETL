@@ -21,36 +21,39 @@
  */
 -->
 <configuration>
+        <!--HBase的数据保存在HDFS对应目录-->
         <property>
                 <name>hbase.rootdir</name>
-                <value>hdfs://master:8020/hbase</value>
+                <value>hdfs://master:9000/hbase</value>
         </property>
 
+        <!--是否是分布式环境-->
         <property>
                 <name>hbase.cluster.distributed</name>
                 <value>true</value>
         </property>
 
-        <!-- 0.98后的新变动，之前版本没有.port,默认端口为60000 -->
-        <property>
-                <name>hbase.master.port</name>
-                <value>16000</value>
-        </property>
-
-
-        <property>
-                <name>hbase.zookeeper.property.clientPort</name>
-                <value>2181</value>
-        </property>
-
+        <!--配置ZK的地址-->
         <property>
                 <name>hbase.zookeeper.quorum</name>
-                <value>master:2181,slave01:2181,slave02:2181</value>
+                <!--不要有空格，还是不行就换ip-->
+                <value>master,slave01,slave02</value>
         </property>
-
         <property>
                 <name>hbase.zookeeper.property.dataDir</name>
-                <value>/export/servers/zookeeper-3.4.9/zkdatas</value>
+                <value>/root/training/hbase-1.3.1/zookeeper</value>
         </property>
 
+        <!--冗余度-->
+        <property>
+                <name>dfs.replication</name>
+                <value>2</value>
+        </property>
+
+        <!--主节点和从节点允许的最大时间误差-->
+        <property>
+                <name>hbase.master.maxclockskew</name>
+                <value>180000</value>
+        </property>
 </configuration>
+

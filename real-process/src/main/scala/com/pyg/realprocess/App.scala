@@ -4,6 +4,7 @@ import java.util.Properties
 
 import com.alibaba.fastjson.JSON
 import com.pyg.realprocess.bean.{ClickLog, Message}
+import com.pyg.realprocess.task.PreprocessTask
 import com.pyg.realprocess.util.GlobalConfigUtil
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
@@ -94,10 +95,11 @@ object App {
         Message(ClickLog(message), count, timeStamp)
     }
 
-    tupleDataStream.print()
+    // tupleDataStream.print()
 
     // 添加水印支持(解决消息因为网络延迟而没有被处理)
-    tupleDataStream.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Message] {
+    // watermarkDataStream 水印处理过的数据
+    var watermarkDataStream: DataStream[Message] = tupleDataStream.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[Message] {
       var currentTimeStamp = 0l
 
       // 延迟时间
@@ -119,6 +121,10 @@ object App {
         currentTimeStamp
       }
     })
+
+    // 数据预处理
+    val clickLogWideDataStream = PreprocessTask.process(watermarkDataStream)
+    clickLogWideDataStream.print()
 
     // 执行
     env.execute("real-process")
