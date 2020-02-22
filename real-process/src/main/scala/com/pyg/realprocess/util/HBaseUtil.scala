@@ -27,6 +27,7 @@ object HBaseUtil {
 
   /**
    * 返回table，如果不存在，则创建表
+   *
    * @param tableNameStr
    * @param columnFamilyName
    * @return
@@ -36,7 +37,7 @@ object HBaseUtil {
     val tableName: TableName = TableName.valueOf(tableNameStr)
 
     // 不存在则创建表
-    if(!admin.tableExists(tableName)) {
+    if (!admin.tableExists(tableName)) {
       // 构建出表的描述的创建者
       val descBuilder: TableDescriptorBuilder = TableDescriptorBuilder.newBuilder(tableName)
 
@@ -53,11 +54,12 @@ object HBaseUtil {
 
   /**
    * 存储单列数据
-   * @param tableNameStr 表名
-   * @param rowkey  rowkey
+   *
+   * @param tableNameStr     表名
+   * @param rowkey           rowkey
    * @param columnFamilyName 列族名
-   * @param columnName 列名
-   * @param columnValue 列值
+   * @param columnName       列名
+   * @param columnValue      列值
    */
   def putData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnName: String, columnValue: String) = {
     // 获取表
@@ -79,6 +81,7 @@ object HBaseUtil {
 
   /**
    * 通过单列名获取列值
+   *
    * @param tableNameStr
    * @param rowkey
    * @param columnFamilyName
@@ -94,7 +97,7 @@ object HBaseUtil {
       // 3、进行查询
       val result: Result = table.get(get)
       // 4、判断查询结果是否为空，并且包含我们要查询的列
-      if (result!=null && result.containsColumn(columnFamilyName.getBytes, columnName.getBytes)) {
+      if (result != null && result.containsColumn(columnFamilyName.getBytes, columnName.getBytes)) {
         val bytes: Array[Byte] = result.getValue(columnFamilyName.getBytes, columnName.getBytes)
 
         Bytes.toString(bytes)
@@ -116,6 +119,7 @@ object HBaseUtil {
 
   /**
    * 存储多列数据
+   *
    * @param tableNameStr
    * @param rowkey
    * @param columnFamilyName
@@ -146,13 +150,14 @@ object HBaseUtil {
 
   /**
    * 获取多列数据的值
+   *
    * @param tableNameStr
    * @param rowkey
    * @param columnFamilyName
    * @param columnNameList 多个列名
    * @return 多个列名和多个列值的Map集合
    */
-  def getMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnNameList: List[String]):Map[String, String] = {
+  def getMapData(tableNameStr: String, rowkey: String, columnFamilyName: String, columnNameList: List[String]): Map[String, String] = {
     // 1、获取table
     val table = getTable(tableNameStr, columnFamilyName)
     try {
@@ -163,7 +168,7 @@ object HBaseUtil {
       val result = table.get(getRK)
 
       // 4、遍历列名集合，取出列值，构建成Map返回
-      columnNameList.map{
+      columnNameList.map {
         col =>
           val bytes: Array[Byte] = result.getValue(columnFamilyName.getBytes(), col.getBytes)
 
@@ -176,7 +181,7 @@ object HBaseUtil {
       }.filter(_._1 != "").toMap // 过滤掉空值
     } catch {
       case e: Exception => e.printStackTrace()
-      Map[String, String]()
+        Map[String, String]()
     } finally {
       // 5、关闭table
       table.close()
@@ -185,6 +190,7 @@ object HBaseUtil {
 
   /**
    * 删除数据
+   *
    * @param tableNameStr
    * @param rowkey
    * @param columnFamilyName
@@ -209,11 +215,10 @@ object HBaseUtil {
   }
 
   def main(args: Array[String]): Unit = {
-     println(getTable("test", "info"))
+         println(getTable("test", "info"))
 
     // 保存数据
     // putData("test", "1", "info", "t1", "Hello World")
-
     // println(getData("test", "1", "info", "t1"))
 
     val map = Map(
@@ -225,7 +230,7 @@ object HBaseUtil {
     // putMapData("test", "1", "info", map)
     // println(getMapData("test", "1", "info", List("t1", "t2")))
 
-//    deleteData("test", "1", "info")
-//    println(getMapData("test", "1", "info", List("t1", "t2")))
+    // deleteData("test", "1", "info")
+    // println(getMapData("test", "1", "info", List("t1", "t2")))
   }
 }
