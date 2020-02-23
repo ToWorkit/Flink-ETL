@@ -3,8 +3,8 @@ package com.pyg.realprocess
 import java.util.Properties
 
 import com.alibaba.fastjson.JSON
-import com.pyg.realprocess.bean.{ClickLog, Message}
-import com.pyg.realprocess.task.PreprocessTask
+import com.pyg.realprocess.bean.{ClickLog, ClickLogWide, Message}
+import com.pyg.realprocess.task.{ChannelPvUvTask, ChannelRealHotTask, PreprocessTask}
 import com.pyg.realprocess.util.GlobalConfigUtil
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
@@ -123,8 +123,16 @@ object App {
     })
 
     // 数据预处理
-    val clickLogWideDataStream = PreprocessTask.process(watermarkDataStream)
-    clickLogWideDataStream.print()
+    val clickLogWideDataStream: DataStream[ClickLogWide] = PreprocessTask.process(watermarkDataStream)
+    // clickLogWideDataStream.print()
+
+    // ChannelRealHotTask.process(clickLogWideDataStream).print()
+
+    // 频道热点分析
+    // ChannelRealHotTask.process(clickLogWideDataStream)
+
+    // Pv && Uv
+    ChannelPvUvTask.process(clickLogWideDataStream)
 
     // 执行
     env.execute("real-process")

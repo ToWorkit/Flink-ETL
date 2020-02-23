@@ -24,7 +24,7 @@ object PreprocessTask {
         // 转换地区
         val address = msg.clickLog.country + msg.clickLog.province + msg.clickLog.city
 
-//        val isNewTuple: (Int, Int, Int, Int) = isNewProcess(msg)
+        val isNewTuple: (Int, Int, Int, Int) = isNewProcess(msg)
 
         ClickLogWide(
           msg.clickLog.channelID,
@@ -44,11 +44,11 @@ object PreprocessTask {
           address,
           yearMonth,
           yearMonthDay,
-          yearMonthDayHour, 0, 0, 0, 0)
-//          isNewTuple._1,
-//          isNewTuple._2,
-//          isNewTuple._3,
-//          isNewTuple._4)
+          yearMonthDayHour,
+          isNewTuple._1,
+          isNewTuple._2,
+          isNewTuple._3,
+          isNewTuple._4)
     }
   }
 
@@ -97,7 +97,7 @@ object PreprocessTask {
     } else {
       // 老用户
       isNew = 0
-      // 其他字段需要进行时间戳的比对
+      // 其他字段需要进行时间戳的比对 当前时间和hbase中的历史时间
       isHourNew = compareDate(msg.timeStamp, lastVisitedTime.toLong, "yyyyMMddHH")
       isDayNew = compareDate(msg.timeStamp,lastVisitedTime.toLong,"yyyyMMdd")
       isMonthNew = compareDate(msg.timeStamp,lastVisitedTime.toLong,"yyyyMM")
