@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.alibaba.fastjson.JSON
 import com.pyg.realprocess.bean.{ClickLog, ClickLogWide, Message}
-import com.pyg.realprocess.task.{ChannelPvUvTask, ChannelRealHotTask, PreprocessTask}
+import com.pyg.realprocess.task.{ChannelFreshnessTask, ChannelPvUvTask, ChannelRealHotTask, PreprocessTask}
 import com.pyg.realprocess.util.GlobalConfigUtil
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
@@ -130,6 +130,9 @@ object App {
 
     // 频道热点分析
     // ChannelRealHotTask.process(clickLogWideDataStream)
+
+    // 各维度的用户新鲜度
+    // ChannelFreshnessTask.process(clickLogWideDataStream)
 
     // Pv && Uv
     ChannelPvUvTask.process(clickLogWideDataStream)
