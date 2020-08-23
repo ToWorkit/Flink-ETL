@@ -46,7 +46,7 @@ public class CanalClient {
      * @param instance Canal实例名
      * @param username 用户名
      * @param password 密码
-     * @return Canal连接器
+     * @return Canal   连接器
      */
     public static CanalConnector getConn(String host, int port, String instance, String username, String password) {
         CanalConnector canalConnector = CanalConnectors.newSingleConnector(new InetSocketAddress(host, port), instance, username, password);
@@ -68,7 +68,7 @@ public class CanalClient {
                 continue;
             }
 
-            // 那么解析binlog
+            // 解析binlog
             CanalEntry.RowChange rowChange = null;
 
             try {
